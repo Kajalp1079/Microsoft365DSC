@@ -160,6 +160,15 @@
                     TenantId              = $TenantId
                     CertificateThumbprint = $CertificateThumbprint
                 }
+                AADClaimsMappingPolicy 'AADClaimsMappingPolicy-Test1234'
+                {
+                    ApplicationId         = $ApplicationId
+                    TenantId              = $TenantId
+                    CertificateThumbprint = $CertificateThumbprint
+                    DisplayName           = "Test1234";
+                    Ensure                = "Absent";
+                    Id                    = "fd0dc3f3-cfdf-4d56-bb03-e18161a5ac93";
+                }
                 AADConditionalAccessPolicy 'ConditionalAccessPolicy'
                 {
                     DisplayName                          = 'Example CAP'
@@ -273,6 +282,85 @@
                     CertificateThumbprint   = $CertificateThumbprint
                     DisplayName             = "CertificateBasedAuthentication rollout policy";
                     Ensure                  = "Absent";
+                }
+                AADFederationConfiguration 'MyFederation'
+                {
+                    IssuerUri                       = 'https://contoso.com/issuerUri'
+                    DisplayName                     = 'contoso display name'
+                    MetadataExchangeUri             ='https://contoso.com/metadataExchangeUri'
+                    PassiveSignInUri                = 'https://contoso.com/signin'
+                    PreferredAuthenticationProtocol = 'wsFed'
+                    Domains                         = @('contoso.com')
+                    SigningCertificate              = 'MIIDADCCAeigAwIBAgIQEX41y8r6'
+                    Ensure                          = 'Absent'
+                    ApplicationId                   = $ApplicationId
+                    TenantId                        = $TenantId
+                    CertificateThumbprint           = $CertificateThumbprint
+                }
+                AADFilteringPolicy 'AADFilteringPolicy-MyPolicy'
+                {
+                    Action                = "block";
+                    ApplicationId         = $ApplicationId;
+                    CertificateThumbprint = $CertificateThumbprint;
+                    Description           = "This is a demo policy";
+                    Ensure                = "Absent";
+                    Name                  = "MyPolicy";
+                    TenantId              = $TenantId;
+                }
+                AADFilteringPolicyRule 'AADFilteringPolicyRule-FQDN'
+                {
+                    ApplicationId         = $ApplicationId;
+                    CertificateThumbprint = $CertificateThumbprint;
+                    Destinations          = @(
+                        MSFT_AADFilteringPolicyRuleDestination{
+                            value = 'Microsoft365DSC.com'
+                        }
+                    );
+                    Ensure                = "Absent";
+                    Name                  = "MyFQDN";
+                    Policy                = "AMyPolicy";
+                    RuleType              = "fqdn";
+                    TenantId              = $TenantId;
+                }
+                AADFilteringPolicyRule 'AADFilteringPolicyRule-Web'
+                {
+                    ApplicationId         = $ApplicationId;
+                    CertificateThumbprint = $CertificateThumbprint;
+                    Destinations          = @(
+                        MSFT_AADFilteringPolicyRuleDestination{
+                            name = 'ChildAbuseImages'
+                        }
+                    );
+                    Ensure                = "Absent";
+                    Name                  = "MyWebContentRule";
+                    Policy                = "MyPolicy";
+                    RuleType              = "webCategory";
+                    TenantId              = $TenantId;
+                }
+                AADFilteringProfile 'AADFilteringProfile-My Profile'
+                {
+                    ApplicationId         = $ApplicationId;
+                    CertificateThumbprint = $CertificateThumbprint;
+                    Description           = "Description of profile";
+                    Ensure                = "Absent";
+                    Name                  = "My PRofile";
+                    Policies              = @(
+                        MSFT_AADFilteringProfilePolicyLink{
+                            Priority = 100
+                            LoggingState = 'enabled'
+                            PolicyName = 'MyPolicyChoseBine'
+                            State = 'enabled'
+                        }
+                        MSFT_AADFilteringProfilePolicyLink{
+                            Priority = 200
+                            LoggingState = 'enabled'
+                            PolicyName = 'MyTopPolicy'
+                            State = 'enabled'
+                        }
+                    );
+                    Priority              = 120;
+                    State                 = "enabled";
+                    TenantId              = $TenantId;
                 }
                 AADGroup 'MyGroups'
                 {
@@ -436,6 +524,46 @@
                     CertificateThumbprint     = $CertificateThumbprint
                     Ensure                 = "Absent";
                     OrganizationId         = "e91d4e0e-d5a5-4e3a-be14-2192592a59af";
+                }
+                AADRemoteNetwork 'AADRemoteNetwork-Test Remote Network'
+                {
+                    Ensure                = "Absent";
+                    ForwardingProfiles    = @("Microsoft 365 traffic forwarding profile");
+                    Id                    = "c60c41bb-e512-48e3-8134-c312439a5343";
+                    Name                  = "Test Remote Network";
+                    Region                = "australiaSouthEast";
+                    ApplicationId         = $ApplicationId
+                    TenantId              = $TenantId
+                    CertificateThumbprint = $CertificateThumbprint
+                    DeviceLinks           = @(
+                        MSFT_AADRemoteNetworkDeviceLink {
+                            Name                    = 'Test Link'
+                            IPAddress               = '1.1.1.1'
+                            BandwidthCapacityInMbps = 'mbps500'
+                            DeviceVendor            = 'ciscoCatalyst'
+                            BgpConfiguration        = MSFT_AADRemoteNetworkDeviceLinkbgpConfiguration {
+                                Asn                 = 82
+                                LocalIPAddress      = '1.1.1.87'
+                                PeerIPAddress       = '1.1.1.2'
+                            }
+                            RedundancyConfiguration = MSFT_AADRemoteNetworkDeviceLinkRedundancyConfiguration {
+                                RedundancyTier      = 'zoneRedundancy'
+                                ZoneLocalIPAddress  = '1.1.1.8'
+                            }
+                            TunnelConfiguration     = MSFT_AADRemoteNetworkDeviceLinkTunnelConfiguration {
+                                PreSharedKey               = 'blah'
+                                ZoneRedundancyPreSharedKey = 'blah'
+                                SaLifeTimeSeconds          = 300
+                                IPSecEncryption            = 'gcmAes192'
+                                IPSecIntegrity             = 'gcmAes192'
+                                IKEEncryption              = 'aes192'
+                                IKEIntegrity               = 'gcmAes128'
+                                DHGroup                    = 'ecp256'
+                                PFSGroup                   = 'pfsmm'
+                                ODataType                  = '#microsoft.graph.networkaccess.tunnelConfigurationIKEv2Custom'
+                            }
+                        }
+                    );
                 }
                 AADRoleDefinition 'AADRoleDefinition1'
                 {

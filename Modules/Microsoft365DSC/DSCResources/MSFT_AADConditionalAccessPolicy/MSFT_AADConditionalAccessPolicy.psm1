@@ -219,6 +219,10 @@ function Get-TargetResource
         [System.String]
         $TransferMethods,
 
+        [Parameter()]
+        [System.String]
+        $InsiderRiskLevels,
+
         #generic
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
@@ -709,6 +713,7 @@ function Get-TargetResource
         TransferMethods                          = [System.String]$Policy.Conditions.AuthenticationFlows.TransferMethods
         #Standard part
         TermsOfUse                               = $termOfUseName
+        InsiderRiskLevels                        = $Policy.Conditions.InsiderRiskLevels
         Ensure                                   = 'Present'
         Credential                               = $Credential
         ApplicationSecret                        = $ApplicationSecret
@@ -942,6 +947,10 @@ function Set-TargetResource
         [Parameter()]
         [System.String]
         $TransferMethods,
+
+        [Parameter()]
+        [System.String]
+        $InsiderRiskLevels,
 
         #generic
         [Parameter()]
@@ -1401,7 +1410,7 @@ function Set-TargetResource
         if ($currentParameters.ContainsKey('ServicePrincipalFilterMode') -and $currentParameters.ContainsKey('ServicePrincipalFilterRule'))
         {
             #check if the custom attribute exist.
-            $customattribute = Invoke-MgGraphRequest -Method GET -Uri https://graph.microsoft.com/v1.0/directory/customSecurityAttributeDefinitions
+            $customattribute = Invoke-MgGraphRequest -Method GET -Uri $Global:MSCloudLoginConnectionProfile.MicrosoftGraph.ResourceUrl + "v1.0/directory/customSecurityAttributeDefinitions"
             $ServicePrincipalFilterRule -match "CustomSecurityAttribute.(?<attribute>.*) -.*"
             $attrinrule = $matches.attribute
             if ($customattribute.value.id -contains $attrinrule){
@@ -1575,6 +1584,11 @@ function Set-TargetResource
                     }
                 }
             }
+        }
+
+        if ($null -ne $InsiderRiskLevels)
+        {
+            $conditions.Add("insiderRiskLevels", $InsiderRiskLevels)
         }
 
         Write-Verbose -Message 'Set-Targetresource: process risk levels and app types'
@@ -1753,7 +1767,9 @@ function Set-TargetResource
         try
         {
             Write-Verbose -Message "Updating existing policy with values: $(Convert-M365DscHashtableToString -Hashtable $NewParameters)"
-            Invoke-MgGraphRequest -Method PATCH -Uri "https://graph.microsoft.com/beta/identity/conditionalAccess/policies/$($currentPolicy.Id)" -Body $NewParameters
+
+            $Uri = $Global:MSCloudLoginConnectionProfile.MicrosoftGraph.ResourceUrl + "beta/identity/conditionalAccess/policies/$($currentPolicy.Id)"
+            Invoke-MgGraphRequest -Method PATCH -Uri $Uri -Body $NewParameters
         }
         catch
         {
@@ -1776,7 +1792,8 @@ function Set-TargetResource
         {
             try
             {
-                Invoke-MgGraphRequest -Method POST -Uri 'https://graph.microsoft.com/beta/identity/conditionalAccess/policies' -Body $NewParameters
+                $Uri = $Global:MSCloudLoginConnectionProfile.MicrosoftGraph.ResourceUrl + "beta/identity/conditionalAccess/policies"
+                Invoke-MgGraphRequest -Method POST -Uri $Uri -Body $NewParameters
             }
             catch
             {
@@ -2040,6 +2057,10 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $TransferMethods,
+
+        [Parameter()]
+        [System.String]
+        $InsiderRiskLevels,
 
         #generic
         [Parameter()]

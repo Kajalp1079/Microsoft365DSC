@@ -259,10 +259,7 @@ function Export-TargetResource
     {
         $Script:ExportMode = $true
 
-        if ($null -ne $Global:M365DSCExportResourceInstancesCount)
-        {
-            $Global:M365DSCExportResourceInstancesCount++
-        }
+        $Global:M365DSCExportResourceInstancesCount++
 
         $params = @{
             IsSingleInstance      = 'Yes'

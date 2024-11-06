@@ -6,7 +6,6 @@
 | --- | --- | --- | --- | --- |
 | **IsSingleInstance** | Key | String | Only valid value is 'Yes'. | `Yes` |
 | **NetworkPacketTaggingStatus** | Write | String | Enable Tenant Restrictions for Entra ID (covering all cloud apps). Accepted values are enabled or disabled. | |
-| **Ensure** | Write | String | Present ensures the instance exists, absent ensures it is removed. | `Absent`, `Present` |
 | **Credential** | Write | PSCredential | Credentials of the workload's Admin | |
 | **ApplicationId** | Write | String | Id of the Azure Active Directory application to authenticate with. | |
 | **TenantId** | Write | String | Id of the Azure Active Directory tenant used for authentication. | |
